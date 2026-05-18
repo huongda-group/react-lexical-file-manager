@@ -1,0 +1,67 @@
+{
+  "name": "@huongda-group/react-lexical-file-manager",
+  "version": "0.1.0",
+  "description": "Lexical plugin for professional file management — image viewer, video player, file attachments",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "example": "vite example --config example/vite.config.ts"
+  },
+  "dependencies": {
+    "@huongda-group/react-file-manager": "^2.0.1"
+  },
+  "peerDependencies": {
+    "lexical": ">=0.44.0",
+    "@lexical/react": ">=0.44.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@huongda-group/react-file-manager": "^2.0.1",
+    "@lexical/react": "^0.44.0",
+    "@playwright/test": "^1.60.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^29.1.1",
+    "lexical": "^0.44.0",
+    "msw": "^2.14.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "vite-plugin-dts": "^5.0.0",
+    "vitest": "^4.1.6"
+  },
+  "keywords": [
+    "lexical",
+    "file-manager",
+    "react",
+    "editor",
+    "media-library"
+  ],
+  "license": "MIT",
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

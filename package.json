@@ -34,7 +34,6 @@
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@huongda-group/react-file-manager": "^2.0.1",
     "@lexical/react": "^0.44.0",
     "@playwright/test": "^1.60.0",
     "@testing-library/react": "^16.3.2",

@@ -2,7 +2,8 @@ import type { IFile } from '@huongda-group/react-file-manager';
 import type { FileItem } from '../types';
 
 export function fileItemToIFile(f: FileItem): IFile {
-  const parent = f.path === '/' ? '' : f.path;
+  // Strip trailing slashes so a parent like '/docs/' does not yield '/docs//name'.
+  const parent = f.path === '/' ? '' : f.path.replace(/\/+$/, '');
   return {
     _id: f.id,
     name: f.name,
@@ -17,8 +18,11 @@ export function fileItemToIFile(f: FileItem): IFile {
 }
 
 export function iFileToFileItem(f: IFile): FileItem {
-  const lastSlash = f.path.lastIndexOf('/');
-  const parentPath = lastSlash <= 0 ? '/' : f.path.substring(0, lastSlash);
+  // Normalize trailing slashes so the parent of '/docs//x' or '/docs/' resolves
+  // back to '/docs' rather than a slash-padded variant that breaks path equality.
+  const normalized = (f.path ?? '').replace(/\/+$/, '');
+  const lastSlash = normalized.lastIndexOf('/');
+  const parentPath = lastSlash <= 0 ? '/' : normalized.substring(0, lastSlash);
   return {
     id: f._id,
     name: f.name,

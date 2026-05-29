@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { JSX } from 'react';
 import type { LexicalEditor } from 'lexical';
 import { FileManagerPlugin } from './plugins/file-manager-plugin';
@@ -19,12 +20,18 @@ interface LexicalFileManagerPluginProps {
 }
 
 export function LexicalFileManagerPlugin(props: LexicalFileManagerPluginProps): JSX.Element | null {
-  const adapter: FileManagerAdapter = props.adapter ?? buildAdapter({
-    onFetchFiles: props.onFetchFiles,
-    onUpload: props.onUpload,
-    onDelete: props.onDelete,
-    onCreateFolder: props.onCreateFolder
-  });
+  // Memoize so a fresh adapter identity is not produced on every render, which
+  // would otherwise drive FileManagerModal's loadFiles effect to re-fetch on
+  // each parent render (and let stale in-flight fetches race the latest result).
+  const adapter: FileManagerAdapter = useMemo(
+    () => props.adapter ?? buildAdapter({
+      onFetchFiles: props.onFetchFiles,
+      onUpload: props.onUpload,
+      onDelete: props.onDelete,
+      onCreateFolder: props.onCreateFolder
+    }),
+    [props.adapter, props.onFetchFiles, props.onUpload, props.onDelete, props.onCreateFolder]
+  );
 
   return (
     <FileManagerPlugin adapter={adapter} onFileSelect={props.onFileSelect} defaultDisplayMode={props.defaultDisplayMode} permissions={props.permissions} appearance={props.appearance} language={props.language} labels={props.labels} />

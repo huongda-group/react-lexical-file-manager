@@ -31,7 +31,7 @@ npm install lexical @lexical/react react react-dom
 Import the styles in your app entry:
 
 ```ts
-import '@huongda-group/react-lexical-file-manager/dist/react-lexical-file-manager.css';
+import '@huongda-group/react-lexical-file-manager/style.css';
 ```
 
 ## Quick Start

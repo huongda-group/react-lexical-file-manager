@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { DecoratorNode, type EditorConfig, type LexicalNode, type NodeKey, type SerializedLexicalNode, type Spread } from 'lexical';
+import { sanitizeUrl } from '../utils/sanitize-url';
 
 export type SerializedVideoNode = Spread<{
   src: string;
@@ -21,14 +22,7 @@ export class VideoNode extends DecoratorNode<JSX.Element> {
   }
 
   static clone(node: VideoNode): VideoNode {
-    return new VideoNode(
-      node.__src,
-      node.__poster,
-      node.__controls,
-      node.__autoplay,
-      node.__loop,
-      node.__key
-    );
+    return new VideoNode(node.__src, node.__poster, node.__controls, node.__autoplay, node.__loop, node.__key);
   }
 
   static importJSON(data: SerializedVideoNode): VideoNode {
@@ -77,7 +71,7 @@ export class VideoNode extends DecoratorNode<JSX.Element> {
   decorate(): JSX.Element {
     return (
       <span style={{ display: 'block', margin: '8px 0' }}>
-        <video src={this.__src} poster={this.__poster} controls={this.__controls} autoPlay={this.__autoplay} loop={this.__loop} style={{ maxWidth: '100%', borderRadius: 4 }} />
+        <video src={sanitizeUrl(this.__src)} poster={this.__poster ? sanitizeUrl(this.__poster) : undefined} controls={this.__controls} autoPlay={this.__autoplay} muted={this.__autoplay} loop={this.__loop} style={{ maxWidth: '100%', borderRadius: 4 }} />
       </span>
     );
   }
@@ -90,13 +84,7 @@ export function $createVideoNode(props: {
   autoplay?: boolean;
   loop?: boolean;
 }): VideoNode {
-  return new VideoNode(
-    props.src,
-    props.poster,
-    props.controls ?? true,
-    props.autoplay ?? false,
-    props.loop ?? false
-  );
+  return new VideoNode(typeof props.src === 'string' ? props.src : '', typeof props.poster === 'string' ? props.poster : undefined, props.controls !== false, props.autoplay === true, props.loop === true);
 }
 
 export function $isVideoNode(node: LexicalNode | null | undefined): node is VideoNode {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { JSX } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { COMMAND_PRIORITY_EDITOR, $insertNodes } from 'lexical';
@@ -31,7 +31,13 @@ interface FileManagerPluginProps {
 export function FileManagerPlugin(props: FileManagerPluginProps): JSX.Element | null {
   const editor = useLexicalComposerContext()[0];
   const [isOpen, setIsOpen] = useState(false);
-  const [displayMode, setDisplayMode] = useState<'modal' | 'fullscreen'>(props.defaultDisplayMode ?? 'modal');
+  const defaultDisplayMode = props.defaultDisplayMode ?? 'modal';
+  const [displayMode, setDisplayMode] = useState<'modal' | 'fullscreen'>(defaultDisplayMode);
+
+  // Keep the latest onFileSelect in a ref so the INSERT command registers once
+  // (an inline onFileSelect would otherwise re-register on every render).
+  const onFileSelectRef = useRef(props.onFileSelect);
+  onFileSelectRef.current = props.onFileSelect;
 
   useEffect(() => {
     if (!editor.hasNode(ImageNode) || !editor.hasNode(VideoNode) || !editor.hasNode(FileNode)) {
@@ -43,23 +49,29 @@ export function FileManagerPlugin(props: FileManagerPluginProps): JSX.Element | 
     return editor.registerCommand(
       OPEN_FILE_MANAGER_COMMAND,
       () => {
+        // Reset to the configured default each open so a prior fullscreen toggle
+        // does not leak into the next session.
+        setDisplayMode(defaultDisplayMode);
         setIsOpen(true);
         return true;
       },
       COMMAND_PRIORITY_EDITOR
     );
-  }, [editor]);
+  }, [editor, defaultDisplayMode]);
 
   useEffect(() => {
     return editor.registerCommand(
       INSERT_FILE_COMMAND,
       (file) => {
-        if (props.onFileSelect) {
+        const onFileSelect = onFileSelectRef.current;
+        if (onFileSelect) {
           try {
-            props.onFileSelect(file, editor);
+            onFileSelect(file, editor);
           } catch (err) {
             console.warn('[react-lexical-file-manager] onFileSelect threw:', err);
           }
+        } else if (file.url == null || file.url === '') {
+          console.warn('[react-lexical-file-manager] Skipped insert: file has no url.', file);
         } else {
           editor.update(() => {
             $insertNodes([$createNodeForFile(file)]);
@@ -70,7 +82,7 @@ export function FileManagerPlugin(props: FileManagerPluginProps): JSX.Element | 
       },
       COMMAND_PRIORITY_EDITOR
     );
-  }, [editor, props.onFileSelect]);
+  }, [editor]);
 
   if (!isOpen) {
     return null;

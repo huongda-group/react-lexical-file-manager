@@ -8,11 +8,17 @@ export function $createNodeForFile(file: FileItem): ImageNode | VideoNode | File
   const url = file.url ?? '';
 
   if (mime.startsWith('image/')) {
-    return $createImageNode({ src: url, alt: file.name });
+    return $createImageNode({
+      src: url,
+      alt: file.name
+    });
   }
 
   if (mime.startsWith('video/')) {
-    return $createVideoNode({ src: url, poster: file.thumbnailUrl });
+    return $createVideoNode({
+      src: url,
+      poster: file.thumbnailUrl
+    });
   }
 
   return $createFileNode({

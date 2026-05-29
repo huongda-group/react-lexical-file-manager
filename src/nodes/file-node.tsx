@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { DecoratorNode, type EditorConfig, type LexicalNode, type NodeKey, type SerializedLexicalNode, type Spread } from 'lexical';
+import { sanitizeUrl } from '../utils/sanitize-url';
 
 export type SerializedFileNode = Spread<{
   url: string;
@@ -65,7 +66,7 @@ export class FileNode extends DecoratorNode<JSX.Element> {
   decorate(): JSX.Element {
     const sizeLabel = this.__size != null ? ` · ${(this.__size / 1024).toFixed(0)} KB` : '';
     return (
-      <a href={this.__url} download={this.__name} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: 6, textDecoration: 'none', color: 'inherit', fontSize: 13, margin: '4px 0' }}>
+      <a href={sanitizeUrl(this.__url)} download={this.__name} rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: 6, textDecoration: 'none', color: 'inherit', fontSize: 13, margin: '4px 0' }}>
         <span>📎</span>
         <span>{this.__name}</span>
         <span style={{ color: '#718096', fontSize: 11 }}>{sizeLabel}</span>

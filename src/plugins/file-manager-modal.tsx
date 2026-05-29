@@ -68,6 +68,10 @@ export function FileManagerModal(props: FileManagerModalProps): JSX.Element {
 
   async function handleUpload(file: File): Promise<IFile> {
     const results = await props.adapter.upload([file]);
+    if (results.length === 0) {
+      throw new Error('[react-lexical-file-manager] Upload returned no files.');
+    }
+
     const mapped = results.map(fileItemToIFile);
     setFiles((prev) => [
       ...prev,
@@ -77,15 +81,21 @@ export function FileManagerModal(props: FileManagerModalProps): JSX.Element {
   }
 
   function handleDelete(items: IFile[], _trash: boolean): void {
-    props.adapter.delete(items.map(iFileToFileItem)).then(() => {
-      const ids = new Set(items.map((f) => f._id));
-      setFiles((prev) => prev.filter((f) => !ids.has(f._id)));
-    }).catch(console.error);
+    props.adapter.delete(items.map(iFileToFileItem))
+      .then(() => {
+        const ids = new Set(items.map((f) => f._id));
+        setFiles((prev) => prev.filter((f) => !ids.has(f._id)));
+      })
+      .catch(console.error);
   }
 
   function handleCreateFolder(name: string, parent: IFile | null): void {
-    const path = parent != null ? parent.path : currentPath;
-    props.adapter.createFolder(name, path).then(() => loadFiles(currentPath)).catch(console.error);
+    // parent.path is the third-party full IFile path; normalize to the adapter's
+    // '/'-rooted FileItem convention (strip trailing slash, blank → root).
+    const path = parent != null ? (parent.path.replace(/\/+$/, '') || '/') : currentPath;
+    props.adapter.createFolder(name, path)
+      .then(() => loadFiles(currentPath))
+      .catch(console.error);
   }
 
   const isFullscreen = props.displayMode === 'fullscreen';
@@ -101,8 +111,22 @@ export function FileManagerModal(props: FileManagerModalProps): JSX.Element {
   };
 
   const containerStyle: CSSProperties = isFullscreen
-    ? { width: '100%', height: '100%', background: '#fff', display: 'flex', flexDirection: 'column' }
-    : { width: '90vw', maxWidth: 1100, height: '80vh', background: '#fff', borderRadius: 8, overflow: 'hidden', display: 'flex', flexDirection: 'column' };
+    ? {
+      width: '100%',
+      height: '100%',
+      background: '#fff',
+      display: 'flex',
+      flexDirection: 'column'
+    } : {
+      width: '90vw',
+      maxWidth: 1100,
+      height: '80vh',
+      background: '#fff',
+      borderRadius: 8,
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
+    };
 
   function handleOverlayClick(e: React.MouseEvent<HTMLDivElement>): void {
     if (e.target === e.currentTarget) {
